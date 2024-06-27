@@ -1,10 +1,11 @@
+require('dotenv').config();
 const mysql = require('mysql');
 
 const conn = mysql.createConnection({
-    host: '127.0.0.1',
-    user: 'root',
-    password: '',
-    database: 'users'
+    host: process.env.HOSTNAME || 'localhost',
+    user: process.env.USER,
+    password: process.env.PASSWORD,
+    database: process.env.DATABASE
 });
 
 try {
@@ -35,10 +36,40 @@ try {
         });
     };
 
-    
+    const removeUser = (req, res) => {
+        const id = req.params.id;
+        conn.query('delete from users where id =?', id, (err, rows) => {
+            if (err) {
+                console.log(err);
+                res.status(500).json(err.message);
+            } else {
+                res.status(200).send({
+                    message: 'User deleted successfully',
+                });
+            }
+        });
+    };
+
+    const updateUser = (req, res) => {
+        const id = req.params.id;
+        const user = req.body;
+        conn.query('update users set? where id =?', [user, id], (err, rows) => {
+            if (err) {
+                console.log(err);
+                res.status(500).json(err.message);
+            } else {
+                res.status(200).send({
+                    message: 'User updated successfully',
+                });
+            }
+        });
+    };
 
     exports.getAllUsers = getAllUsers;
     exports.addNewUser = addNewUser;
+    exports.removeUser = removeUser;
+    exports.updateUser = updateUser;
+
 } catch (error) {
     console.error(error);
 }
